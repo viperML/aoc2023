@@ -1,14 +1,27 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+pub use eyre::Context;
+pub use eyre::Result;
+pub use tracing::{debug, info};
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+use std::env::current_dir;
+use tracing_subscriber::prelude::*;
+use tracing_subscriber::EnvFilter;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn setup() -> Result<String> {
+    let subscriber = tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .without_time()
+        .compact()
+        .with_level(false)
+        .with_line_number(true)
+        .finish();
+
+    subscriber.try_init()?;
+    debug!("Tracing init");
+
+    let path = current_dir()?;
+    let input_file = path.join("input.txt");
+
+    let input = std::fs::read_to_string(input_file).context("Reading input file input.txt")?;
+
+    Ok(input)
 }

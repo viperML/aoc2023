@@ -2,11 +2,17 @@ let
   pkgs = import <nixpkgs> {};
 in
   with pkgs;
-    mkShellNoCC {
+    mkShell {
       packages = [
         cargo
         rustc
         rustfmt
-        rust-analyzer
+        rust-analyzer-unwrapped
+
+        perlPackages.perl
+        perlPackages.LWPProtocolHttps
       ];
+      env = {
+        RUST_SRC_PATH = "${rustPlatform.rustLibSrc}";
+      };
     }

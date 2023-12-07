@@ -1,0 +1,41 @@
+#! /usr/bin/env -S perl
+# -*- mode: perl -*-
+
+use v5.38;
+use strict;
+use warnings;
+
+use File::Spec::Functions;
+use HTTP::Tiny;
+
+my $year = "2023";
+my $day = shift or die "Usage: $0 <day>\n";
+
+say "Getting $year day $day";
+
+my $root = $ENV{ROOT} or die "ROOT not set\n";
+say "ROOT: $root";
+
+# Get the problem
+my $url = "https://adventofcode.com/$year/day/$day/input";
+my $cookie = $ENV{AOC_COOKIE} or die "AOC_COOKIE not set\n";
+
+# perform https request
+my $http = HTTP::Tiny->new;
+my $response = $http->get($url, {
+    headers => {
+        Cookie => $cookie,
+    }
+});
+
+die "Failed!\n" unless $response->{success};
+
+my $dir = catdir($root, "day$day");
+mkdir $dir unless -d $dir;
+
+# write input to input.txt
+my $input = catfile($dir, "input.txt");
+open my $fh, ">", $input or die "Failed to open $input: $!\n";
+print $fh $response->{content};
+close $fh;
+
